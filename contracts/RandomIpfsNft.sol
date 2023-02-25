@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 error RandomIpfsNft__RangeOutOfBoundes();
 error RandomIpfsNft__NeedMoreETH();
 error RandomIpfsNft__TransferFailed();
+error RandomIpfsNft__AlreadyInitialized();
 
 contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     //type declaration
@@ -34,6 +35,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint256 internal constant MAX_CHANCE_VALUE = 100;
     string[] internal s_dogTokenUris;
     uint256 internal immutable i_mintFee;
+    bool private s_initialized;
 
     //Events
     event NftRequested(uint256 indexed requestId, address requester);
@@ -51,7 +53,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
         i_callbackGasLimit = callbackGasLimit;
-        s_dogTokenUris = dogTokenUris;
+        _initializeContract(dogTokenUris);
         i_mintFee = mintFee;
     }
 
@@ -79,6 +81,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
 
         Breed dogBreed = getBreedFromModdedRng(moddedRng);
+        s_tokenCounter += s_tokenCounter;
         _safeMint(dogOwner, newTokenId);
         _setTokenURI(newTokenId, s_dogTokenUris[uint256(dogBreed)]);
 
@@ -111,6 +114,14 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         revert RandomIpfsNft__RangeOutOfBoundes();
     }
 
+    function _initializeContract(string[3] memory dogTokenUris) private {
+        if (s_initialized) {
+            revert RandomIpfsNft__AlreadyInitialized();
+        }
+        s_dogTokenUris = dogTokenUris;
+        s_initialized = true;
+    }
+
     function getChanceArray() public pure returns (uint256[3] memory) {
         return [10, 30, MAX_CHANCE_VALUE];
     }
@@ -127,5 +138,9 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
 
     function getTokeCounter() public view returns (uint256) {
         return s_tokenCounter;
+    }
+
+    function getInitialized() public view returns (bool) {
+        return s_initialized;
     }
 }

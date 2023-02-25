@@ -3,7 +3,7 @@ const {developmentChains} = require('../helper-hardhat-config');
 
 module.exports = async function({getNamedAccounts, deployments}){
     const{deploy, log} = deployments;
-    const{deployer} = getNamedAccounts();
+    const{deployer} = await getNamedAccounts();
 
     const BASE_FEE = ethers.utils.parseEther("0.25");
     const GAS_PRICE_LINK = 11e9;
@@ -22,3 +22,5 @@ module.exports = async function({getNamedAccounts, deployments}){
         log("------------------");
     }
 }
+
+module.exports.tags = ["all", "mocks"];
